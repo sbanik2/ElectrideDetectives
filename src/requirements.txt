@@ -1,6 +1,7 @@
-instructor
-openai
-pydantic
+# API client versions validated with run_swarm.ipynb.
+instructor==1.17.0
+openai==3.3.0
+pydantic==2.14.1
 pyyaml
 networkx
 matplotlib
@@ -10,8 +11,8 @@ scipy
 scikit-learn
 sentence-transformers
 pymupdf
-mcp
-arxiv-mcp-server[pdf]
+mcp==1.30.0
+arxiv-mcp-server[pdf]==0.8.2
 ddgs
 joblib
 ase
