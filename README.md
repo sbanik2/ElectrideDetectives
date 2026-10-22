@@ -1,8 +1,21 @@
-# Electride Discovery with a Reasoning Swarm
+<p align="center">
+  <img src="docs/logo.png" alt="ElectroHive" width="110">
+</p>
 
-A multi-agent system in which several LLM scientists independently reason about **why** a material is an
+<h1 align="center">Agentic Swarms for Electride Materials Discovery</h1>
+
+<p align="center">
+  <a href="#how-a-round-works">How it works</a> ·
+  <a href="#the-agents-learn-and-share">Learning and sharing</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#running">Running</a> ·
+  <a href="#analysis-plots-analysispy">Analysis</a> ·
+  <a href="#configuration-configyaml">Configuration</a>
+</p>
+
+A multi-agent swarm in which several LLM scientists independently reason about **why** a material is an
 electride, propose which physical descriptors a classifier should be built from, and refine those proposals
-over several rounds using deterministic, per-class evidence from the data.
+over several rounds with evidence from the data.
 
 Electrides are ionic compounds in which some valence electrons are not bound to any atom: they occupy
 interstitial cavities, channels or layers and behave as anions. Deciding which measurable structural and
@@ -11,18 +24,21 @@ the judgement in the hands of reasoning agents and leaves the arithmetic to a fi
 
 ---
 
-## What this is, and what it is not
-
-| | |
-|---|---|
-| **The agents decide** | which physical quantities the model may use, and why; what the literature supports; what to change after seeing which class fails |
-| **The backend decides** | nothing about the physics. It fits a gradient-boosting classifier on exactly the features it is given and reports honest validation numbers |
-| **Not an AutoML loop** | no feature search, no hyperparameter search, no model selection by the backend. Every candidate comes from an agent with a stated physical reason |
-| **Not a black box** | each proposal is a short list of named physical descriptors, each with an expected direction. The run log records every proposal, its evidence and its score |
-
----
-
 ## How a round works
+
+<p align="center">
+  <img src="docs/round_diagram.png"
+       alt="One round: agents gather evidence with tools, propose a feature set, receive a per-class evaluation, then exchange findings with peers"
+       width="100%">
+</p>
+
+Each round, every agent may call one tool for real evidence, then returns a **FeatureSet**: the descriptors its
+model should be built from, each with the physical role it is expected to play, plus the hypothesis and the
+reasoning behind the choice. The backend fits a classifier on exactly those features and returns a per-class
+evaluation, which opens the agent's next round.
+
+<details>
+<summary>Text version of the diagram</summary>
 
 ```
              ┌──────────── system prompt: problem, rules, usable feature catalog ────────────┐
@@ -35,8 +51,8 @@ the judgement in the hands of reasoning agents and leaves the arithmetic to a fi
            │ proposal: FeatureSet (features + physical role + hypothesis + reasoning)         │
            ▼                                                                                 │
   ┌────────────────────────────────────────────────────────────────────────────┐             │
-  │ Deterministic evaluation (evaluator.py)                                    │             │
-  │  • gradient boosting fitted on exactly those features                      │             │
+  │ evaluation                                                                 │             │
+  │  • classifier fitted on exactly those features                             │             │
   │  • 5 stratified train/validation splits of ALL labeled structures          │             │
   │  • per-class metrics, per-feature role, hardest structures, parent compare │             │
   └────────┬───────────────────────────────────────────────────────────────────┘             │
@@ -45,19 +61,29 @@ the judgement in the hands of reasoning agents and leaves the arithmetic to a fi
   Round r+1: each agent sees its own lineage + feedback, and 2 diverse peers' proposals ──────┘
 ```
 
+</details>
+
 After the last round the top-ranked feature set is refit on all labeled structures and exported for scoring
 new data.
 
-### Why repeated splits
+---
 
-Each proposal is scored on 5 stratified 75/25 splits with fixed seeds. The coefficients (or, here, the trees)
-are fitted on the training part and scored on the held-out part, so a proposal cannot win by memorising the
-data. Scores are reported as mean ± standard deviation, and the agents are told explicitly when a change is
-inside that noise band.
+## The agents learn and share
 
-### What an agent actually reads
+Between rounds, knowledge moves in two directions.
 
-Each round's feedback contains, in plain language first:
+**Each agent learns from its own history.** An agent keeps a private lineage: every feature set it has
+proposed, the score each one reached, and which one is currently its best — its *parent*. The next proposal is
+written from that parent, so an agent builds on what its own evidence showed instead of starting over.
+
+**Agents share what they found with each other.** At every round boundary each agent is shown two peers'
+proposals, with their scores and their reasoning. Peers are picked for difference rather than quality: an agent
+sees colleagues whose findings are unlike its own and unlike each other, so useful descriptors spread through
+the swarm while the agents keep exploring different parts of the feature space. An agent may adopt a peer's
+descriptor when the evidence supports it, and the prompt asks it to state what it kept, what it changed, and why.
+
+**What an agent reads before deciding.** The evaluation of its last proposal arrives in plain language first,
+then in numbers:
 
 * **Ranking quality** — ROC-AUC with an interpretation ("separates them moderately well").
 * **Which class fails** — e.g. "Main failure: CALLING NON-ELECTRIDES ELECTRIDES. It finds 90% of electrides but
@@ -106,7 +132,7 @@ The feedback states facts only. What to do about them is the agent's decision, g
 
 ## Input data
 
-### 1. Feature catalog (`*.jsonl`)
+### 1. Existing feature catalog (`*.jsonl`)
 
 One JSON record per line:
 
@@ -202,7 +228,7 @@ agents asked for, and token usage per agent.
 ```python
 from evaluator import score_dataset
 scores, metrics = score_dataset(results["final_fit"], "my_new_structures.csv")
-# later session, newest exported model:
+# in a later session, newest exported model:
 scores, metrics = score_dataset(None, "my_new_structures.csv")
 ```
 
@@ -276,28 +302,6 @@ current-round output, so rounds are synchronous and no agent can simply chase th
 handed back to the same agent, and only then is a final answer and proposal produced for that round. Failed
 searches are reported as failures ("FAILED … rate_limited"), never as "no literature exists".
 
-**Determinism where it matters.** Same proposal, same splits, same seeds, same numbers. The LLM is the only
-stochastic part, and every one of its proposals is checked by the same fixed procedure.
-
-**Honest reporting.** Agents only ever see validation numbers. In-sample metrics of the exported model are
-labelled "optimistic" wherever they appear.
-
----
-
-## Known limitations
-
-* **Selection optimism.** 20–30 proposals are evaluated on the same splits and the best is reported, so the
-  winner's score is somewhat optimistic. Treat an external dataset as the real test.
-* **Feature coverage.** Agents learn how good a feature is only after using it, so a strong but untried feature
-  can go unexplored. Varied starting points (higher temperature) and peer crossover help, but do not guarantee
-  coverage. `plot_feature_usage` shows how much of the catalog was ever tried.
-* **arXiv rate limits.** All literature calls share one lock with a ≥3 s interval. Repeated runs in quick
-  succession still earn HTTP 429 or timeouts; failures are surfaced to the agents and the run continues.
-* **Citation discipline.** Agents sometimes paraphrase a paper they have only downloaded, not read. Check the
-  run log when a claim matters.
-* **Small datasets.** With a few hundred structures, differences under the reported ± spread are noise. The
-  feedback says so, but the agents can still over-read them.
-
 ---
 
 ## Reproducing a run
@@ -305,13 +309,3 @@ labelled "optimistic" wherever they appear.
 Everything needed is in the run log: the full config, the data fingerprint, every prompt, every tool result and
 every evaluation. Fixing `seed` fixes the splits; the LLM remains stochastic, so re-running produces different
 proposals but identical scoring of any given proposal.
-
----
-
-## Acknowledgements
-
-Built with [instructor](https://github.com/jxnl/instructor) for schema-validated LLM output,
-[sentence-transformers](https://www.sbert.net/) for peer selection and retrieval,
-[arxiv-mcp-server](https://pypi.org/project/arxiv-mcp-server/) for literature access,
-[PyMuPDF](https://pymupdf.readthedocs.io/) for PDF parsing, [scikit-learn](https://scikit-learn.org/) for the
-classifier and metrics, and [ASE](https://wiki.fysik.dtu.dk/ase/) for structure visualisation.
