@@ -325,8 +325,10 @@ def fetch_paper(arxiv_id: str) -> str:
 
 
 # ----------------------------------------------------------------------------- registry + setup
+from valency import valency_search          # semantic literature search via the Valency MCP server
+
 ALL_TOOLS = {"web_search": web_search, "calculator": calculator, "literature_search": literature_search,
-             "fetch_paper": fetch_paper, "kb_search": kb_search}
+             "fetch_paper": fetch_paper, "kb_search": kb_search, "valency_search": valency_search}
 
 def setup_tools(config, encoder):
     """Apply config.yaml (tools + paths sections), share the swarm's encoder, build the KB index.

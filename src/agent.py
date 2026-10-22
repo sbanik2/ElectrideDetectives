@@ -48,8 +48,8 @@ class FeatureSet(BaseModel):
 class ScientificAgent(BaseModel):
     answer: str = Field(description="Scientific explanation of your electride hypothesis and current model; distinguish evidence from assumptions.")
     next_step: str = Field(description="What you plan to test next and why: a change to your feature set, or a literature question.")
-    tool: Literal["none", "web_search", "literature_search", "fetch_paper", "kb_search", "calculator"] = Field(
-        description="""literature_search: find arXiv papers (abstracts); fetch_paper: download an arXiv paper's full text into the local collection (input = arXiv ID); kb_search: full-text passages from the local collection (prefix "[arXiv:ID] " to search one paper); 
+    tool: Literal["none", "web_search", "literature_search", "valency_search", "fetch_paper", "kb_search", "calculator"] = Field(
+        description="""literature_search: find arXiv papers (abstracts); valency_search: semantic paper search across arXiv and PubMed (describe the idea, not keywords); fetch_paper: download an arXiv paper's full text into the local collection (input = arXiv ID); kb_search: full-text passages from the local collection (prefix "[arXiv:ID] " to search one paper); 
         web_search: general web; calculator: arithmetic; otherwise none."""
     )
     tool_input: str = Field(default="", description="Short search query (3-6 keywords), an arXiv ID for fetch_paper, '[arXiv:ID] keywords' to search one fetched paper with kb_search, or an arithmetic expression.")
@@ -65,6 +65,9 @@ Solve the complete problem independently; do not take a fixed specialist role.
 You have tools:
 web_search(query) for general web evidence, and calculator(expression) for arithmetic;
 literature_search(query) for scientific papers from arXiv (titles + full abstracts);
+valency_search(query) for papers found by MEANING across arXiv and PubMed: describe the idea in a phrase
+  ("electrons localized in lattice cavities acting as anions") rather than keywords, to reach work that
+  literature_search misses;
 fetch_paper(arxiv_id) to download a promising paper's full text into the local collection; then use kb_search in a later round to read its details;
 kb_search(query) for full-text passages (with file + page) from the team's local paper collection;
   write "[arXiv:2103.12345] keywords" to search only one paper you fetched.
