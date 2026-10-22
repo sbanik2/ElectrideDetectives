@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" alt="ElectrideDetectives" width="110">
+  <img src="docs/logo.png" alt="ElectrideDetectives" width="160">
 </p>
 
 <h1 align="center">Agentic Swarms for Electride Materials Discovery</h1>
