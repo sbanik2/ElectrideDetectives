@@ -5,6 +5,13 @@
 <h1 align="center">Agentic Swarms for Electride Materials Discovery</h1>
 
 <p align="center">
+  <a href="https://colab.research.google.com/github/sbanik2/ElectrideDetectives/blob/main/run_colab.ipynb">
+    <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab">
+  </a>
+</p>
+
+<p align="center">
+  <a href="#run-in-your-browser">Run in your browser</a> ·
   <a href="#how-a-round-works">How it works</a> ·
   <a href="#the-agents-learn-and-share">Learning and sharing</a> ·
   <a href="#installation">Installation</a> ·
@@ -21,6 +28,23 @@ Electrides are ionic compounds in which some valence electrons are not bound to 
 interstitial cavities, channels or layers and behave as anions. Deciding which measurable structural and
 chemical quantities reveal that behaviour is a scientific judgement, not a fitting problem. This project puts
 the judgement in the hands of reasoning agents and leaves the arithmetic to a fixed, auditable backend.
+
+---
+
+## Run in your browser
+
+1. Click **Open in Colab** above and sign in to Google if prompted. The default CPU runtime is sufficient.
+2. Choose **Runtime → Run all**. Setup downloads the code, installs dependencies, and loads the included data.
+3. Paste your **[OpenRouter API key](https://openrouter.ai/settings/keys)** into the masked prompt and press Enter.
+
+No code edits, local installation, or data uploads are needed. The notebook uses `openai/gpt-oss-120b`
+with the existing five-agent, five-round configuration and the bundled 200-structure dataset. Your
+OpenRouter account pays for model requests; the key stays in runtime memory and is not saved in the
+notebook or run logs. You can also provide `OPENROUTER_API_KEY` in the runtime environment.
+
+Results and plots appear in the notebook, and a ZIP containing the run logs, fitted model, scores, and
+analysis tables downloads at the end. The first setup takes a few minutes. The local Jupyter workflow
+remains available under [Installation](#installation).
 
 ---
 
@@ -104,7 +128,8 @@ The feedback states facts only. What to do about them is the agent's decision, g
 
 ```
 .
-├── run_swarm.ipynb                               # the only notebook: LLM setup → config → build → run → analysis
+├── run_colab.ipynb                               # browser launch: automatic setup → OpenRouter key → run → download
+├── run_swarm.ipynb                               # local notebook: LLM setup → config → build → run → analysis
 ├── config.yaml                                   # every structural setting (no secrets, no LLM endpoint)
 ├── src/
 │   ├── requirements.txt
