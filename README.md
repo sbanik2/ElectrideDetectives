@@ -183,33 +183,41 @@ Scanned PDFs with no text layer are reported at index time ("no extractable text
 
 ## Installation
 
-Python **3.11+** (required by the arXiv MCP server).
+With Jupyter already installed, use a **Python 3.11+** kernel (required by the arXiv MCP server):
 
-```bash
-git clone https://github.com/sbanik2/ElectrideDetectives.git
-cd ElectrideDetectives
-python -m venv .venv && source .venv/bin/activate
-pip install -r src/requirements.txt
-```
+1. Download and unzip this repository, or clone it with `git clone https://github.com/sbanik2/ElectrideDetectives.git`.
+2. Open **`run_swarm.ipynb`** inside the repository folder in Jupyter.
+3. Choose **Run All**. The first cell installs the Python dependencies into the notebook's kernel.
+4. When prompted, choose your LLM provider and paste your API key into the masked field, then press Enter.
 
-The first run downloads the `all-MiniLM-L6-v2` embedding model from Hugging Face.
+The notebook continues with the bundled data and configuration. No code edits or data uploads are needed.
+The first run also downloads the `all-MiniLM-L6-v2` embedding model from Hugging Face.
 
 ### LLM access
 
-The endpoint, model and key live in **section 1 of the notebook**, because they change from machine to machine:
+Section 1 asks you to choose a provider:
 
-```python
-MODEL_NAME = "gpt-oss-120b"
-client = AsyncOpenAI(base_url="https://your-endpoint/v1", api_key=os.environ["SN_API_KEY"])
-async_gen = instructor.from_openai(client, mode=instructor.Mode.JSON)
+```text
+Choose your LLM provider:
+  1. OpenRouter
+  2. OpenAI
+  3. Other / custom endpoint (OpenAI-compatible)
+Provider [1–3]:
 ```
 
-Any OpenAI-compatible endpoint works. `instructor` enforces the response schema; the notebook adds a
-multi-attempt retry whose temperature steps **down** on each retry (lower temperature produces valid JSON more
-reliably).
+| Choice | Model | What you enter |
+|---|---|---|
+| OpenRouter | `openai/gpt-oss-120b` | Your OpenRouter API key |
+| OpenAI | `gpt-5.6-terra` | Your OpenAI API key |
+| Other / custom endpoint | Your provider's model ID | API base URL (such as `https://your-provider/v1`), model ID, and API key |
 
-> If the host name cannot be resolved (`nodename nor servname provided`), the problem is network/VPN, not the
-> code — the request never leaves the machine.
+The key is entered at runtime with a masked prompt; it is not written into the notebook source or outputs.
+Use an API key for the provider you select. Custom endpoints must support OpenAI-compatible Chat Completions
+with JSON mode (`response_format: {"type": "json_object"}`) and the `max_tokens` parameter.
+
+`instructor` validates the response schema, and the notebook retries failed responses. The OpenRouter preset
+retains the existing temperature schedule. OpenAI uses `max_completion_tokens` and its default sampling
+settings; custom endpoints also use their default sampling settings.
 
 ---
 
