@@ -44,7 +44,6 @@ def _(mo):
 @app.cell
 def _():
     import functools
-    import os
     from getpass import getpass
 
     import instructor
@@ -53,16 +52,14 @@ def _():
     print("Choose your LLM provider:")
     print("  1. OpenRouter")
     print("  2. OpenAI")
-    print("  3. ORNL SambaNova")
-    print("  4. Other / custom endpoint (OpenAI-compatible)")
-    choice = input("Provider [1–4]: ").strip()
-    while choice not in {"1", "2", "3", "4"}:
-        choice = input("Please enter 1, 2, 3, or 4: ").strip()
+    print("  3. Other / custom endpoint (OpenAI-compatible)")
+    choice = input("Provider [1–3]: ").strip()
+    while choice not in {"1", "2", "3"}:
+        choice = input("Please enter 1, 2, or 3: ").strip()
 
     presets = {
         "1": ("OpenRouter", "https://openrouter.ai/api/v1", "openai/gpt-oss-120b"),
         "2": ("OpenAI", "https://api.openai.com/v1", "gpt-5.6-terra"),
-        "3": ("ORNL SambaNova", "https://sambanova.cades.ornl.gov/v1", "gpt-oss-120b"),
     }
     if choice in presets:
         provider, base_url, MODEL_NAME = presets[choice]
@@ -76,19 +73,15 @@ def _():
             MODEL_NAME = input("Model name: ").strip()
 
     print(f"\n{provider} · {MODEL_NAME}")
-    _api_key = os.environ.get("SN_API_KEY", "").strip() if choice == "3" else ""
-    if _api_key:
-        print("API key: taken from the SN_API_KEY environment variable")
-    else:
-        _api_key = getpass("API key: ").strip()
+    _api_key = getpass("API key: ").strip()
     while not _api_key:
         _api_key = getpass("Please enter your API key: ").strip()
     client = AsyncOpenAI(base_url=base_url, api_key=_api_key)
     del _api_key
     async_gen = instructor.from_openai(client, mode=instructor.Mode.JSON)
 
-    # Preserve OpenRouter's and ORNL's sampling settings; other providers use their defaults.
-    TEMPERATURE = 0.7 if choice in {"1", "3"} else None
+    # Preserve OpenRouter's sampling settings; other providers use their defaults.
+    TEMPERATURE = 0.7 if choice == "1" else None
     call_settings = {"max_retries": 3}
     if choice == "2":
         call_settings["max_completion_tokens"] = 8192
