@@ -223,7 +223,8 @@ settings; custom endpoints also use their default sampling settings.
 
 ## Running
 
-Run `run_swarm.ipynb` from the repository root. The modules live in `src/`, so the notebook puts that folder on
+Run `run_swarm.ipynb` (Jupyter) or `run_swarm_marimo.py` (the same workflow as a [marimo](https://marimo.io)
+notebook: `marimo edit run_swarm_marimo.py`) from the repository root. The modules live in `src/`, so the notebook puts that folder on
 the import path first:
 
 ```python

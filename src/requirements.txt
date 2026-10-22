@@ -16,3 +16,4 @@ arxiv-mcp-server[pdf]==0.8.2
 ddgs
 joblib
 ase
+marimo
