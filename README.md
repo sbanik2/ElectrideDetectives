@@ -106,8 +106,8 @@ The feedback states facts only. What to do about them is the agent's decision, g
 .
 ├── run_swarm.ipynb                               # the only notebook: LLM setup → config → build → run → analysis
 ├── config.yaml                                   # every structural setting (no secrets, no LLM endpoint)
-├── requirements.txt
 ├── src/
+│   ├── requirements.txt
 │   ├── agent.py                                  # schemas, prompts, peer selection, agent round, swarm loop
 │   ├── evaluator.py                              # deterministic evaluation, ranking, export, score_dataset
 │   ├── tools.py                                  # web_search, calculator, arXiv search/download, local-paper RAG
@@ -189,7 +189,7 @@ Python **3.11+** (required by the arXiv MCP server).
 git clone https://github.com/sbanik2/ElectrideDetectives.git
 cd ElectrideDetectives
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 ```
 
 The first run downloads the `all-MiniLM-L6-v2` embedding model from Hugging Face.
