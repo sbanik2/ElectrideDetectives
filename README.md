@@ -308,9 +308,9 @@ data:
 
 evaluator:
   n_repeats: 5                     # stratified train/validation splits per proposal
-  validation_fraction: 0.25
+  validation_fraction: 0.4
   seed: 42
-  max_features: 5                  # features an agent may select per proposal
+  max_features: 8                  # features an agent may select per proposal
   min_coverage: 0.5
   gb_params: {n_estimators: 200, learning_rate: 0.05, max_depth: 3, subsample: 0.9}
 
