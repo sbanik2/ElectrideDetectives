@@ -1,0 +1,49 @@
+{"function": "structure_summary", "feature": "composition_per_cell", "description": "Element counts in the supplied cell (JSON; requires numeric transformation for equation fitting)"}
+{"function": "structure_summary", "feature": "site_count", "description": "Number of atomic sites"}
+{"function": "structure_summary", "feature": "cell_matrix_A", "description": "3x3 lattice matrix in angstrom (JSON; requires numeric transformation for equation fitting)"}
+{"function": "structure_summary", "feature": "volume_A3", "description": "Unit-cell volume in cubic angstrom"}
+{"function": "structure_summary", "feature": "volume_per_atom_A3", "description": "Cell volume divided by number of sites"}
+{"function": "structure_summary", "feature": "density_g_cm3", "description": "Mass density"}
+{"function": "structure_summary", "feature": "space_group__number", "description": "Detected space-group number at symprec=0.001 Å"}
+{"function": "structure_summary", "feature": "space_group__symprec_A", "description": "Symmetry tolerance used, angstrom"}
+{"function": "structure_summary", "feature": "cell_condition_number", "description": "Condition number of lattice matrix"}
+{"function": "structure_summary", "feature": "metal_site_fraction", "description": "Fraction of atomic sites occupied by metals"}
+{"function": "structure_summary", "feature": "alkali_alkaline_site_fraction", "description": "Fraction of sites occupied by alkali or alkaline-earth elements"}
+{"function": "structure_summary", "feature": "transition_metal_site_fraction", "description": "Fraction of sites occupied by transition metals"}
+{"function": "structure_summary", "feature": "f_block_site_fraction", "description": "Fraction of sites occupied by lanthanoids or actinoids"}
+{"function": "structure_summary", "feature": "pauling_electronegativity__min", "description": "Minimum available Pauling electronegativity across sites"}
+{"function": "structure_summary", "feature": "pauling_electronegativity__mean", "description": "Mean available Pauling electronegativity across sites"}
+{"function": "structure_summary", "feature": "pauling_electronegativity__max", "description": "Maximum available Pauling electronegativity across sites"}
+{"function": "structure_summary", "feature": "pauling_electronegativity__std", "description": "Population standard deviation of available Pauling electronegativities"}
+{"function": "structure_summary", "feature": "parser_warnings", "description": "CIF parsing warnings (JSON; requires numeric transformation for equation fitting)"}
+{"function": "electron_count_hypotheses", "feature": "state_options", "description": "Allowed oxidation states for each element (JSON; requires numeric transformation for equation fitting)"}
+{"function": "electron_count_hypotheses", "feature": "hypotheses", "description": "Up to 256 oxidation-state assignments with formal residuals per formula and cell (JSON; requires numeric transformation for equation fitting)"}
+{"function": "electron_count_hypotheses", "feature": "total_assignment_count", "description": "Total possible oxidation-state combinations"}
+{"function": "electron_count_hypotheses", "feature": "hypotheses_truncated", "description": "Whether assignment list was truncated at 256"}
+{"function": "electron_count_hypotheses", "feature": "residual_range_e_per_formula", "description": "Minimum and maximum formal charge sums per reduced formula; JSON array [min,max] (JSON; requires numeric transformation for equation fitting)"}
+{"function": "electron_count_hypotheses", "feature": "attainable_residuals_e_per_formula", "description": "All attainable formal charge sums per formula (JSON; requires numeric transformation for equation fitting)"}
+{"function": "electron_count_hypotheses", "feature": "neutral_assignment_exists", "description": "Whether an allowed oxidation-state assignment sums to zero; may be null"}
+{"function": "bonding_environment", "feature": "bond_radius_scale", "description": "Multiplier applied to summed covalent radii"}
+{"function": "bonding_environment", "feature": "unique_bonds_per_cell", "description": "Count of unique geometric contacts per cell"}
+{"function": "bonding_environment", "feature": "geometric_coordination_by_element", "description": "Per-element coordination count statistics (min/mean/max/std) (JSON; requires numeric transformation for equation fitting)"}
+{"function": "bonding_environment", "feature": "pair_distance_statistics_A", "description": "Per-element-pair contact-distance statistics in angstrom (JSON; requires numeric transformation for equation fitting)"}
+{"function": "bonding_environment", "feature": "isolated_N2_O2_motifs", "description": "Possible isolated N2/O2 dimers and alternative formal group charges (JSON; requires numeric transformation for equation fitting)"}
+{"function": "bonding_environment", "feature": "variable_valence_elements", "description": "Elements with potentially variable valence (JSON; requires numeric transformation for equation fitting)"}
+{"function": "bonding_environment", "feature": "p_block_lone_pair_candidates", "description": "Elements that may support competing lone-pair chemistry (JSON; requires numeric transformation for equation fitting)"}
+{"function": "cavity_geometry", "feature": "grid_spacing_requested_A", "description": "Requested grid spacing in angstrom"}
+{"function": "cavity_geometry", "feature": "grid_shape", "description": "Voxel grid dimensions (JSON; requires numeric transformation for equation fitting)"}
+{"function": "cavity_geometry", "feature": "actual_grid_edge_lengths_A", "description": "Actual grid edge lengths in angstrom (JSON; requires numeric transformation for equation fitting)"}
+{"function": "cavity_geometry", "feature": "sampled_grid_clearance_statistics_A__min", "description": "Minimum sampled distance minus covalent radius, angstrom"}
+{"function": "cavity_geometry", "feature": "sampled_grid_clearance_statistics_A__mean", "description": "Mean sampled clearance, angstrom"}
+{"function": "cavity_geometry", "feature": "sampled_grid_clearance_statistics_A__max", "description": "Maximum sampled clearance, angstrom"}
+{"function": "cavity_geometry", "feature": "sampled_grid_clearance_statistics_A__std", "description": "Standard deviation of sampled clearance, angstrom"}
+{"function": "cavity_geometry", "feature": "max_clearance_A", "description": "Largest optimized candidate covalent-surface clearance, angstrom"}
+{"function": "cavity_geometry", "feature": "candidate_count_before_output_limit", "description": "Number of candidate void centers before truncation"}
+{"function": "cavity_geometry", "feature": "max_sites", "description": "Maximum reported candidates per candidate family"}
+{"function": "cavity_geometry", "feature": "sites_truncated", "description": "Whether void-center candidates were truncated"}
+{"function": "cavity_geometry", "feature": "sites", "description": "Detailed list of void-center candidates, each with position, clearance, shell chemistry and geometry (JSON; requires numeric transformation for equation fitting)"}
+{"function": "cavity_geometry", "feature": "metal_motif_sites", "description": "Detailed list of metal-triangle/tetrahedron center candidates and shell properties (JSON; requires numeric transformation for equation fitting)"}
+{"function": "cavity_geometry", "feature": "metal_motif_candidate_count_before_output_limit", "description": "Metal-motif candidates before truncation"}
+{"function": "cavity_geometry", "feature": "metal_motif_sites_truncated", "description": "Whether metal-motif centers were truncated"}
+{"function": "void_connectivity", "feature": "grid_shape", "description": "Voxel grid dimensions (JSON; requires numeric transformation for equation fitting)"}
+{"function": "void_connectivity", "feature": "profiles", "description": "List of threshold-specific void fraction, connected components, maximum periodic rank and winding information (JSON; requires numeric transformation for equation fitting)"}

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" alt="ElectroHive" width="110">
+  <img src="docs/logo.png" alt="ElectrideDetectives" width="110">
 </p>
 
 <h1 align="center">Agentic Swarms for Electride Materials Discovery</h1>
@@ -9,7 +9,7 @@
   <a href="#the-agents-learn-and-share">Learning and sharing</a> ·
   <a href="#installation">Installation</a> ·
   <a href="#running">Running</a> ·
-  <a href="#analysis-plots-analysispy">Analysis</a> ·
+  <a href="#analysis-plots-srcanalysispy">Analysis</a> ·
   <a href="#configuration-configyaml">Configuration</a>
 </p>
 
@@ -27,7 +27,7 @@ the judgement in the hands of reasoning agents and leaves the arithmetic to a fi
 ## How a round works
 
 <p align="center">
-  <img src="docs/round_diagram.png"
+  <img src="docs/diagram.png"
        alt="One round: agents gather evidence with tools, propose a feature set, receive a per-class evaluation, then exchange findings with peers"
        width="100%">
 </p>
@@ -104,35 +104,42 @@ The feedback states facts only. What to do about them is the agent's decision, g
 
 ```
 .
-├── run_swarm.ipynb                    # the only notebook: LLM setup → config → build → run → analysis
-├── config.yaml                        # every structural setting (no secrets, no LLM endpoint)
-├── agent.py                           # schemas, prompts, peer selection, agent round, swarm loop
-├── evaluator.py                       # deterministic evaluation, ranking, export, score_dataset
-├── tools.py                           # web_search, calculator, arXiv search/download, local-paper RAG
-├── analysis.py                        # post-run plots (progress, feature maps, metrics, structure viewer)
+├── run_swarm.ipynb                               # the only notebook: LLM setup → config → build → run → analysis
+├── config.yaml                                   # every structural setting (no secrets, no LLM endpoint)
 ├── requirements.txt
-├── electride_feature_rag_clean.jsonl  # feature catalog: function, feature, description  (your file)
-├── electride_features_dataset_200.csv # precomputed features + labels                    (your file)
-├── inputs/kb/                         # local PDFs + papers agents download
-└── outputs/                           # run logs, exported models, scores
+├── src/
+│   ├── agent.py                                  # schemas, prompts, peer selection, agent round, swarm loop
+│   ├── evaluator.py                              # deterministic evaluation, ranking, export, score_dataset
+│   ├── tools.py                                  # web_search, calculator, arXiv search/download, local-paper RAG
+│   └── analysis.py                               # post-run plots (progress, feature maps, metrics, structures)
+├── data/
+│   ├── electride_feature_rag_clean.jsonl         # feature catalog: function, feature, description
+│   ├── electride_features_dataset_200_sample.csv # precomputed features + labels (200 structures)
+│   └── data_extract/                             # how those features were computed: notebook, script,
+│                                                 #   labels.json, example CIFs
+├── docs/                                         # logo and diagram
+├── inputs/kb/                                    # local PDFs + papers the agents download
+└── outputs/                                      # run logs, exported models, scores
 ```
 
 ### Responsibilities
 
-* **`agent.py`** — the `FeatureSet` / `ScientificAgent` schemas, the system prompt, the problem statement, the
-  communication graph, diverse peer selection, the per-round loop, the final ranking and export, and the
+* **`src/agent.py`** — the `FeatureSet` / `ScientificAgent` schemas, the system prompt, the problem statement,
+  the communication graph, diverse peer selection, the per-round loop, the final ranking and export, and the
   tables/plots printed during a run. Receives a ready LLM client from the notebook.
-* **`evaluator.py`** — `FeatureSetEvaluator` (what the swarm calls), `evaluate_feature_set` (one fit + one
+* **`src/evaluator.py`** — `FeatureSetEvaluator` (what the swarm calls), `evaluate_feature_set` (one fit + one
   split), and `score_dataset` (apply an exported model to any CSV). No LLM calls anywhere in this file.
-* **`tools.py`** — one function per tool, each taking a single string and always returning a string, so an agent
-  always sees either evidence or an explicit failure message.
-* **`analysis.py`** — read-only plots over `swarm.evaluator.history`; nothing is refitted.
+* **`src/tools.py`** — one function per tool, each taking a single string and always returning a string, so an
+  agent always sees either evidence or an explicit failure message.
+* **`src/analysis.py`** — read-only plots over `swarm.evaluator.history`; nothing is refitted.
+* **`data/data_extract/`** — the feature-generation step that produced the CSV, kept separate from the swarm.
+  See its own [README](data/data_extract/README.md).
 
 ---
 
 ## Input data
 
-### 1. Existing feature catalog (`*.jsonl`)
+### 1. Feature catalog — `data/electride_feature_rag_clean.jsonl`
 
 One JSON record per line:
 
@@ -143,23 +150,28 @@ One JSON record per line:
 The catalog is what the agents see. Descriptions matter: they are the only thing telling an agent what a
 feature physically means.
 
-### 2. Feature table (`*.csv`)
+### 2. Feature table — `data/electride_features_dataset_200_sample.csv`
 
-One row per structure:
+The sample shipped here holds **200 labeled structures: 84 electrides and 116 non-electrides**, with one row
+per structure:
 
 | column | meaning |
 |---|---|
-| `structure` | identifier (e.g. `matpes-2024_1021_0.cif`) |
+| `structure` | identifier (e.g. `mp-11854.cif`) |
 | `label` | `1` = electride, `0` = non-electride |
 | `<function>__<feature>` | one column per catalog entry, e.g. `cavity_geometry__max_clearance_A` |
 
 `true`/`false` strings are converted to 1/0; missing values are imputed with the **training fold's** median.
 
 A catalog feature is offered to the agents only if its column exists, is numeric, varies, and is present in at
-least `min_coverage` of rows. JSON-valued columns (lists, nested records) and constant run settings are listed
-to the agents as *not usable*, so they can request numeric aggregations of them instead.
+least `min_coverage` of rows — 26 of the 49 catalog entries qualify in the shipped sample. JSON-valued columns
+(lists, nested records) and constant run settings are listed to the agents as *not usable*, so they can request
+numeric aggregations of them instead.
 
-### 3. Local papers (`inputs/kb/`)
+To build this table for your own structures, use `data/data_extract/` (`electride_features.py` and
+`Electride_Feature_CSV.ipynb`, with labels in `labels.json` and CIFs in `data/data_extract/structures/`).
+
+### 3. Local papers — `inputs/kb/`
 
 Drop PDFs in here. They are chunked, embedded with `all-MiniLM-L6-v2` and searchable with `kb_search`.
 Papers that agents download with `fetch_paper` land in the same folder and persist across runs. Each round the
@@ -174,6 +186,8 @@ Scanned PDFs with no text layer are reported at index time ("no extractable text
 Python **3.11+** (required by the arXiv MCP server).
 
 ```bash
+git clone https://github.com/sbanik2/ElectrideDetectives.git
+cd ElectrideDetectives
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -201,7 +215,15 @@ reliably).
 
 ## Running
 
+Run `run_swarm.ipynb` from the repository root. The modules live in `src/`, so the notebook puts that folder on
+the import path first:
+
 ```python
+import sys; sys.path.insert(0, "src")
+from agent import Swarm, load_config
+from evaluator import score_dataset
+
+CONFIG = load_config("config.yaml")
 swarm = Swarm(CONFIG, llm=async_gen, model_name=MODEL_NAME)   # builds evaluator, embedder, tools, KB index
 swarm.plot_graph()
 last_round, results = await swarm.run()
@@ -237,7 +259,7 @@ metrics and a confusion matrix. The same training medians are reused for missing
 
 ---
 
-## Analysis plots (`analysis.py`)
+## Analysis plots (`src/analysis.py`)
 
 ```python
 import analysis
@@ -245,7 +267,8 @@ progress = analysis.plot_agent_progress(swarm)   # score per agent per round + s
 analysis.plot_feature_map(swarm)                 # per agent: which features, which round, how much used
 analysis.plot_feature_usage(swarm)               # how many agents picked each feature, per round
 metrics = analysis.plot_final_model(swarm, results)  # ROC, PR, confusion matrix, score separation
-analysis.show_structures("structures/Ca2N.cif", "structures/NaCl.cif", repeat=(2, 2, 1))
+analysis.show_structures("data/data_extract/structures/mp-11854.cif",
+                         "data/data_extract/structures/mp-559931.cif", repeat=(2, 2, 1))
 ```
 
 `plot_feature_map` is the clearest view of the search: each agent's features down the side, rounds across, the
@@ -270,6 +293,10 @@ swarm:
   proposal_repairs: 1              # same-round retries when a proposal cannot be evaluated
   objective: roc_auc               # what agents maximize; the final table ranks by it
   live_log: false                  # true: print every tool call as it happens instead of round tables
+
+data:
+  feature_catalog: data/electride_feature_rag_clean.jsonl
+  dataset_csv: data/electride_features_dataset_200_sample.csv
 
 evaluator:
   n_repeats: 5                     # stratified train/validation splits per proposal
@@ -309,3 +336,9 @@ searches are reported as failures ("FAILED … rate_limited"), never as "no lite
 Everything needed is in the run log: the full config, the data fingerprint, every prompt, every tool result and
 every evaluation. Fixing `seed` fixes the splits; the LLM remains stochastic, so re-running produces different
 proposals but identical scoring of any given proposal.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).

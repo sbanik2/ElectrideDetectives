@@ -1,0 +1,17 @@
+instructor
+openai
+pydantic
+pyyaml
+networkx
+matplotlib
+numpy
+pandas
+scipy
+scikit-learn
+sentence-transformers
+pymupdf
+mcp
+arxiv-mcp-server[pdf]
+ddgs
+joblib
+ase

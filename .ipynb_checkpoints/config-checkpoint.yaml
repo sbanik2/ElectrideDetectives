@@ -1,0 +1,45 @@
+# Electride discovery swarm settings. The LLM (endpoint, model, key, call settings) is set up in run_swarm.ipynb.
+
+swarm:
+  n_agents: 5
+  n_rounds: 5
+  graph: complete                  # communication topology
+  peers_per_agent: 2               # diverse peers shared with each agent per round
+  peer_weights: {novelty_to_me: 0.55, novelty_to_selected: 0.30, relevance: 0.15}
+  history_rounds: 3                # rounds of private history each agent keeps in its prompt
+  peer_evidence_chars: 1500        # peers see a trimmed tool_result; full text stays in the run log
+  tool_result_chars: 6000          # tool result shown to the agent that called it
+  require_tool_until_round: 3      # rounds where an agent is asked again if it requests no tool
+  proposal_repairs: 1              # same-round retries when a proposal cannot be evaluated
+  objective: roc_auc               # what agents are told to maximize; the final table ranks by it (roc_auc, f1, ...)
+  leaderboard_top: 8               # models printed in the final leaderboard
+  live_log: false                  # true: also print every tool call / model as it happens (old stream)
+
+embedding:
+  model: sentence-transformers/all-MiniLM-L6-v2   # one instance shared by peer selection and kb_search
+
+data:
+  feature_catalog: data/electride_feature_rag_clean.jsonl   # RAG feature records: function, feature, description
+  dataset_csv: data/electride_features_dataset_200_sample.csv      # precomputed CSV: function__feature columns + label
+
+evaluator:
+  n_repeats: 5                     # stratified train/validation splits per proposal
+  validation_fraction: 0.4
+  seed: 42
+  n_permutations: 10               # permutation-importance repeats per feature
+  max_features: 8                  # features an agent may select per proposal
+  min_coverage: 0.5                # features present in fewer structures are not offered to agents
+  gb_params: {n_estimators: 200, learning_rate: 0.05, max_depth: 3, subsample: 0.9}   # gradient-boosting settings
+
+tools:
+  enabled: [web_search, calculator, literature_search, fetch_paper, kb_search]
+  web_search: {max_results: 3}
+  calculator: {max_expression_chars: 120}
+  literature_search: {max_results: 3, min_interval_s: 3.0}   # arXiv asks for >= 3 s between requests
+  kb_search: {top_k: 4, chunk_words: 150, overlap_words: 30, min_words: 20, skip_reference_chunks: true,
+              max_listed_sources: 30}   # papers listed to the agents each round
+
+paths:
+  kb_dir: inputs/kb                # local papers (PDF / arXiv markdown) for kb_search
+  outputs_dir: outputs             # run logs, final_model_*.json, scores
+  arxiv_log: outputs/arxiv_mcp.log
