@@ -29,7 +29,7 @@ the judgement in the hands of reasoning agents and leaves the arithmetic to a fi
 <p align="center">
   <img src="docs/diagram.png"
        alt="One round: agents gather evidence with tools, propose a feature set, receive a per-class evaluation, then exchange findings with peers"
-       width="100%">
+       width="80%">
 </p>
 
 Each round, every agent may call one tool for real evidence, then returns a **FeatureSet**: the descriptors its
